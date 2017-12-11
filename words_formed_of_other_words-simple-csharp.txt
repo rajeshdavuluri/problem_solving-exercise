@@ -1,0 +1,132 @@
+using System;
+using System.Collections.Generic;
+					
+public class Program
+{
+	public static void Main()
+	{
+		
+		Console.WriteLine("Rajesh - Start");
+		
+		// read contents from file
+		//string filename = "C:\\Users\\rdavuluri\\Desktop\\uppu-net-test\\Test.txt";
+		//System.IO.StreamReader file = new System.IO.StreamReader(filename);
+		
+		List <string> filedata = new List<string>();
+		filedata.Add("cat");
+		filedata.Add("cats");
+		filedata.Add("catsdogcats");
+		filedata.Add("dog");
+		filedata.Add("dogcatsdog");
+		filedata.Add("hippopotamuses");
+		filedata.Add("rat");
+		filedata.Add("ratcatdogcat");
+		
+		
+		var masterwords = new Dictionary<string, Tuple<int, int>>();
+		var masterwords_temp = new Dictionary<string, Tuple<int, int>>();
+		var masterwords_final = new Dictionary<string, int>();
+		
+		//First pass
+		string wordtocompare = filedata[0];	
+		foreach (string word in filedata)
+		{			
+			//Console.WriteLine(wordtocompare + " in " + word);			
+			//compare word with immediate word to see if its a substring
+			if ( word.IndexOf(wordtocompare, 0) == 0 )
+			{
+				//var data = new Tuple
+				masterwords.Add(word, Tuple.Create(wordtocompare.Length, 1));
+				//Console.WriteLine("found words");
+
+			}
+			wordtocompare = word;	
+		}
+		
+		
+		int iteration = 1;
+		List<string> wordstoremove = new List<string>();		
+		while (masterwords.Count > 0)
+		{
+			//Print masterwords that are processed
+			Console.WriteLine("============== " + iteration + " ===================");
+			foreach (KeyValuePair<string, Tuple<int, int>> item in masterwords)
+			{
+    			Console.WriteLine("Key: {0}, Value: {1}", item.Key, item.Value);
+			}
+			Console.WriteLine("=================================");
+			
+			foreach (string word in filedata)
+			{
+				//Console.WriteLine("word : " + word);
+				foreach (KeyValuePair<string, Tuple<int, int>> item in masterwords)
+				{
+					//Console.WriteLine("masterword(" + item.Value.Item1 + ") : " + item.Key);
+					if ( (item.Key.Length > word.Length) && (item.Key.IndexOf(word, item.Value.Item1) == item.Value.Item1) ) 
+					{
+						Console.WriteLine("        found " + word + " in " + item.Key + " at: " + item.Value.Item1);
+						if (item.Key.Length == item.Value.Item1 + word.Length)
+						{//Word processing is complete for this master word
+							Console.WriteLine("        search complete for " + item.Key);
+							masterwords_final.Add(item.Key, item.Value.Item2 + 1);
+							wordstoremove.Add(item.Key);
+						}
+						else
+						{
+							var newdata = new Tuple<int, int>(item.Value.Item1 + word.Length, item.Value.Item2 + 1);
+							masterwords_temp[item.Key] = newdata;							
+						}
+						
+					}
+
+					
+				}
+			}
+			
+			foreach (KeyValuePair<string, Tuple<int, int>> item in masterwords_temp)
+			{
+				masterwords[item.Key] = item.Value;
+			}
+			masterwords_temp.Clear();
+			
+			foreach (string wordtoremove in wordstoremove)
+			{
+				masterwords.Remove(wordtoremove);
+			}
+			wordstoremove.Clear();
+			
+			//Print masterwords that are processed
+			Console.WriteLine("============== First processing ===================");
+			foreach (KeyValuePair<string, Tuple<int, int>> item in masterwords)
+			{
+    			Console.WriteLine("Key: {0}, Value: {1}", item.Key, item.Value);
+			}
+			Console.WriteLine("=================================");
+			
+			// If any words with number of subwords matches with interation
+			//       that means there is no further subwords to match
+			foreach (KeyValuePair<string, Tuple<int, int>> item in masterwords)
+			{
+				if (item.Value.Item2 == iteration)
+				{
+					wordstoremove.Add(item.Key);
+				}
+			}
+			foreach (string wordtoremove in wordstoremove)
+			{
+				masterwords.Remove(wordtoremove);
+			}
+			wordstoremove.Clear();
+
+			iteration++;	
+		}
+		
+		//Print first passdata
+		foreach (KeyValuePair<string, int> item in masterwords_final)
+		{
+    		Console.WriteLine("Key: {0}, Value: {1}", item.Key, item.Value);
+		}
+		
+		Console.WriteLine("Rajesh - End");
+	}
+}

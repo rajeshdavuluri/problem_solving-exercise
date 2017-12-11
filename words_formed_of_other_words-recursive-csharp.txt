@@ -1,0 +1,116 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace LongestWordFromWords
+{
+    public class Program
+    {
+        public static Dictionary<string, string> FindLongestWords(string[] listOfWords)
+        {
+			Dictionary<string, string> listofMasterwords = new Dictionary<string, string>();
+            if (listOfWords == null)
+			{
+				throw new ArgumentException("listOfWords");
+			}
+            var sortedWords = listOfWords.OrderByDescending(word => word.Length).ToList();
+            var dict = new HashSet<String>(sortedWords);
+			//var dict = new HashSet<String>(listOfWords.ToList());
+			int i = 0;
+            foreach (var word in sortedWords)
+            {
+				//Console.WriteLine("word : " + word);
+				string subwords = isMadeOfWords(word, dict);
+                if ( subwords != null)
+                {
+					//Remove single words
+					if ( subwords.Contains(":") )
+					{
+						listofMasterwords.Add(word, subwords);
+					}
+                    
+                }
+            }
+            return listofMasterwords;
+        }
+
+        private static string isMadeOfWords(string word, HashSet<string> dict)
+        {
+			//Console.WriteLine("    isMadeOfWords : " + word);
+            if (String.IsNullOrEmpty(word))
+			{
+				return null;
+			}
+            if (word.Length == 1)
+            {
+                if (dict.Contains(word))
+					return word;
+                else
+					return null;
+            }
+            foreach (var pair in generatePairs(word))
+            {
+				//Console.WriteLine("started processing  " + word + " --> " + pair.Item1 + " :: " + pair.Item2);
+                if (dict.Contains(pair.Item1))
+                {
+                    if (dict.Contains(pair.Item2))
+                    {
+						//Console.WriteLine("Return - " + pair.Item1 + ":" + pair.Item2);						
+                        return pair.Item1 + ":" + pair.Item2;
+                    }
+                    else
+                    {
+						string subwords = isMadeOfWords(pair.Item2, dict);
+                        if ( subwords != null )
+						{
+							//Console.WriteLine("Return00 - " + pair.Item1 + ":" + subwords);
+							return pair.Item1 + ":" + subwords;
+						}
+						else
+						{
+							continue;
+						}
+                    }
+                }
+				else
+                {
+					//Console.WriteLine("            Dropping this pair: {0}, {1}",pair.Item1, pair.Item2);
+                    
+				}
+				//Console.WriteLine("stopped processing  " + word + " --> " + pair.Item1 + " :: " + pair.Item2);
+            }
+            return null;
+        }
+
+        private static List<Tuple<string, string>> generatePairs(string word)
+        {
+            var output = new List<Tuple<string, string>>();
+            for (int i = 1; i < word.Length; i++)
+            {
+                output.Add(Tuple.Create(word.Substring(0, i), word.Substring(i)));
+            }
+			//Console.WriteLine("        generatePairs : " + word + " :: " + word.Length);
+            return output;
+        }
+
+        public static void Main(string[] args)
+        {
+            string[] listOfWords = { "a", "aa", "aaah", "aaaah", "aaaahdog", "dog"};
+			Dictionary<string, string> masterwords = FindLongestWords(listOfWords);
+			Console.WriteLine("MASTER WORDS: ");
+            foreach (KeyValuePair<string, string> word in masterwords)
+			{
+				Console.WriteLine("    " + word);		 
+			}
+            string[] listOfWords2 = { "cat", "cats", "catsdogcats", "catxdogcatsrat", "dog", "dogcatsdog", "hippopotamuses", "rat", "ratcatdogcat" };
+			masterwords = FindLongestWords(listOfWords2);
+			Console.WriteLine("MASTER WORDS: ");
+            foreach (KeyValuePair<string, string> word in masterwords)
+			{
+				Console.WriteLine("    " + word);		 
+			}
+            //Console.WriteLine(FindLongestWords(listOfWords2).ToString());
+        }
+    }
+}
