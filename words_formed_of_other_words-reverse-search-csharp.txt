@@ -1,0 +1,143 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+
+namespace LongestWordFromWords
+{
+    public class Program
+    {
+        public static string FindLongestWords()
+        {
+
+            // Read all the words from file
+			Dictionary<string, string> dictionary = new Dictionary<string, string>();
+            string line;
+            try
+            {
+                /*StreamReader sr = new StreamReader(@"InputFile.txt");
+                //line = sr.ReadLine();
+                //while (line != null)
+                {
+                    dictionary.Add(line);
+                    line = sr.ReadLine();
+                }
+                sr.Close();*/
+				dictionary.Add("a", "");
+		        dictionary.Add("aa", "");
+				dictionary.Add("aaah", "");
+				dictionary.Add("aaaah", "");
+				dictionary.Add("aaaahdog", "");
+				dictionary.Add("dog", "");
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception: " + e.Message);
+            }
+            finally
+			{
+            }
+
+            if (dictionary.Count == 0)
+
+            {
+                Console.WriteLine(" File is Empty..!!");
+                return null;
+            }
+
+            // Define a Tuple and stores constructed words and count of sub words
+            var datakey = new List<Tuple<string, int>>();
+
+            // Iterate through dictionary of words find constructed words and corresponding count of sub words
+            foreach (KeyValuePair<string, string> pair in dictionary)
+            {
+				string word = pair.Key;
+				
+                int count = 0;
+				int indextosearch = 0;
+				bool subword = false;
+                for (int k = indextosearch; k < word.Length; k++)
+                {
+                    if (dictionary.ContainsKey(word.Substring(indextosearch, (k - indextosearch))))
+                    {
+						subword = true;
+                    }
+					else
+					{
+						if (subword)
+						{
+							indextosearch = k;
+							k--;
+							count++;
+							subword = false;
+						}
+					}
+                }
+                // Do not append to datakey list if count is 1
+                if (subword)
+                {
+                    datakey.Add(Tuple.Create(word, count));
+                }
+
+            }
+
+            int numberofwords = 0;
+            foreach (var key in datakey)
+            {
+                numberofwords++;
+            }
+
+            // Find out a First and Second longest words
+            String[] strarray = new String[2];
+            int first = 0;
+            int second = 0;
+
+            foreach (var str in datakey)
+            {
+
+                if (str.Item2 > first)
+                {
+                    first = str.Item2;
+                    strarray[0] = str.Item1;
+                }
+
+            }
+
+            foreach (var str in datakey)
+            {
+
+                bool areEqual = String.Equals(str.Item1, strarray[0], StringComparison.Ordinal);
+
+                if (str.Item2 > second && !areEqual)
+                {
+                    second = str.Item2;
+                    strarray[1] = str.Item1;
+
+                }
+
+            }
+            Console.WriteLine("============================================================");
+            Console.WriteLine("SEW:SMART ENERGY WATER Problem Solution:");
+            Console.WriteLine("============================================================");
+            Console.WriteLine("1. FirstLongestWord                    :" + strarray[0]);
+            Console.WriteLine("2. SecondLongestWord                   :" + strarray[1]);
+            Console.WriteLine("3. Number Of Total Constructed Words   :" + numberofwords);
+            Console.WriteLine("============================================================");
+
+            return null;
+        }
+
+
+
+		public static void Main()
+		{
+        	string longest = FindLongestWords();
+            Console.WriteLine("Completed.............................!!!!!!!!!!");
+            Console.WriteLine("============================================================");
+            
+			//Console.Read();
+        }
+    }
+}
